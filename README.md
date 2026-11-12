@@ -21,9 +21,10 @@ JAVA
 
 ## Como executar o projeto
 ```bash
-# Execução tradicional de java
-javac src/Escalonador.java
-java src.Escalonador
+# Execução tradicional de Java (a partir da raiz do repositório)
+javac -d out src/Escalonador.java
+java -cp out Escalonador
+````
 
 
 ## O que aparece na saída
