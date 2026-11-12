@@ -28,7 +28,7 @@ public class Escalonador {
         int quantum = 3;
         int total = 5;
 
-        System.out.printf("[config] quantum=%d | processos=%d | seed=42\n", quantum, total);
+        System.out.printf("[config] quantum=%d | processos=%d | valores fixos\n", quantum, total);
 
         ArrayList<Processo> alta = new ArrayList<>();
         ArrayList<Processo> baixa = new ArrayList<>();

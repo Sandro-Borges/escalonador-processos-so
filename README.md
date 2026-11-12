@@ -15,9 +15,9 @@ JAVA
 - Quantum: 3 unidades
 - Número máximo de processos: 5 processos
 - Tempos de CPU: variáveis por processo
-- Tempos de I/O: 3 a 8 unidades para disco, fita e impressora
+- Tempos de I/O: DISCO=4, FITA=3, IMPRESSORA=5 unidades
 - Critério de geração dos processos: inicializados no início da simulação
-- Semente aleatória, se aplicável: seed de 42
+- Semente aleatória: não se aplica, os valores são fixos no código (a simulação dá sempre o mesmo resultado)
 
 ## Como executar o projeto
 ```bash
@@ -28,7 +28,7 @@ java -cp out Escalonador
 
 
 ## O que aparece na saída
-[config]: exibe os parâmetros iniciais da execução, como valor do quantum, quantidade de processos e seed.
+[config]: exibe os parâmetros iniciais da execução, como valor do quantum, quantidade de processos.
 [t=XXX] Px criado → fila ALTA: indica o momento em que um novo processo é gerado e inserido na fila de alta prioridade.
 CPU executa Px por Y unidades: mostra o momento em que a CPU aloca o processador para o processo executar.
 sofreu preempção → fila BAIXA: quando o processo esgota o seu quantum sem finalizar, sendo rebaixado para a fila de menor prioridade.
