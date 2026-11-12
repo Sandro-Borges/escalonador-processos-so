@@ -4,16 +4,19 @@ public class Escalonador {
 
     //estrutura do processo
     static class Processo {
-        int id, tempoRestante, tipoIo, tempoIo, momentoIo, prioridade;
+        int pid, ppid, tempoRestante, tipoIo, tempoIo, momentoIo, prioridade;
+        String status;
         boolean ioFeito;
 
-        public Processo(int id, int tempo, int tipoIo, int tempoIo, int momentoIo) {
-            this.id = id;
+        public Processo(int pid, int ppid, int tempo, int tipoIo, int tempoIo, int momentoIo) {
+            this.pid = pid;
+            this.ppid = ppid; //0 = processo inicial
             this.tempoRestante = tempo;
             this.tipoIo = tipoIo; // 0=nenhum, 1=disco, 2=fita, 3=impressora
             this.tempoIo = tempoIo;
             this.momentoIo = momentoIo;
             this.prioridade = 1; //fila alta
+            this.status = "NOVO";
             this.ioFeito = false;
         }
     }
@@ -34,16 +37,17 @@ public class Escalonador {
         ArrayList<Processo> baixa = new ArrayList<>();
         ArrayList<IoItem> ioLista = new ArrayList<>();
 
-        //criar os 5 processos
-        alta.add(new Processo(1, 6, 0, 0, -1));
-        alta.add(new Processo(2, 5, 1, 4, 2)); //disco
-        alta.add(new Processo(3, 4, 2, 3, 1)); //fita
-        alta.add(new Processo(4, 3, 3, 5, 1)); //impressora
-        alta.add(new Processo(5, 2, 0, 0, -1));
+        //criar os 5 processos (todos filhos do processo inicial, ppid 0)
+        alta.add(new Processo(1, 0, 6, 0, 0, -1));
+        alta.add(new Processo(2, 0, 5, 1, 4, 2)); //disco
+        alta.add(new Processo(3, 0, 4, 2, 3, 1)); //fita
+        alta.add(new Processo(4, 0, 3, 3, 5, 1)); //impressora
+        alta.add(new Processo(5, 0, 2, 0, 0, -1));
 
         int tempo = 0, finalizados = 0;
         for (Processo p : alta) {
-            System.out.printf("[t=%03d] P%d criado -> fila ALTA\n", tempo, p.id);
+            p.status = "PRONTO";
+            System.out.printf("[t=%03d] P%d criado -> fila ALTA\n", tempo, p.pid);
         }
 
         //loop principal
@@ -58,16 +62,17 @@ public class Escalonador {
             for (IoItem item : concluidos) {
                 ioLista.remove(item);
                 Processo p = item.p;
+                p.status = "PRONTO";
                 // disco volta pra baixa/ fita e impressora vão pra alta
                 if (p.tipoIo == 1) {
                     p.prioridade = 2;
                     baixa.add(p);
-                    System.out.printf("[t=%03d] P%d retornou do DISCO -> fila BAIXA\n", tempo, p.id);
+                    System.out.printf("[t=%03d] P%d retornou do DISCO -> fila BAIXA\n", tempo, p.pid);
                 } else {
                     p.prioridade = 1;
                     alta.add(p);
                     String nome = (p.tipoIo == 2) ? "FITA" : "IMPRESSORA";
-                    System.out.printf("[t=%03d] P%d retornou da %s -> fila ALTA\n", tempo, p.id, nome);
+                    System.out.printf("[t=%03d] P%d retornou da %s -> fila ALTA\n", tempo, p.pid, nome);
                 }
             }
 
@@ -92,22 +97,26 @@ public class Escalonador {
                 pediuIo = true;
             }
 
-            System.out.printf("[t=%03d] CPU executa P%d por %d unidades\n", tempo, atual.id, exec);
+            atual.status = "EXECUTANDO";
+            System.out.printf("[t=%03d] CPU executa P%d por %d unidades\n", tempo, atual.pid, exec);
             tempo += exec;
             atual.tempoRestante -= exec;
 
             if (pediuIo) {
                 atual.ioFeito = true;
+                atual.status = "BLOQUEADO";
                 ioLista.add(new IoItem(atual, atual.tempoIo));
                 String nomeIo = (atual.tipoIo == 1) ? "DISCO" : (atual.tipoIo == 2) ? "FITA" : "IMPRESSORA";
-                System.out.printf("[t=%03d] P%d solicitou I/O %s\n", tempo, atual.id, nomeIo);
+                System.out.printf("[t=%03d] P%d solicitou I/O %s\n", tempo, atual.pid, nomeIo);
             } else if (atual.tempoRestante == 0) {
                 finalizados++;
-                System.out.printf("[t=%03d] P%d finalizado\n", tempo, atual.id);
+                atual.status = "FINALIZADO";
+                System.out.printf("[t=%03d] P%d finalizado\n", tempo, atual.pid);
             } else {
                 if (veioAlta) atual.prioridade = 2;
+                atual.status = "PRONTO";
                 baixa.add(atual);
-                System.out.printf("[t=%03d] P%d sofreu preempção -> fila BAIXA\n", tempo, atual.id);
+                System.out.printf("[t=%03d] P%d sofreu preempção -> fila BAIXA\n", tempo, atual.pid);
             }
         }
 
